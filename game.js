@@ -71,24 +71,24 @@ function handleTouch(e) {
     playBassLoop();
 
     const rect = canvas.getBoundingClientRect();
+    // Calculate scale because the canvas is resized by CSS on mobile
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     
-    // Reset keys before checking current touches
-    state.keys['ArrowLeft'] = false;
-    state.keys['ArrowRight'] = false;
+    // Reset firing state
     state.keys['Space'] = false;
 
     for (let i = 0; i < e.touches.length; i++) {
-        const touchX = e.touches[i].clientX - rect.left;
-        const touchY = e.touches[i].clientY - rect.top;
+        // Map touch to internal 800x600 coordinates
+        const touchX = (e.touches[i].clientX - rect.left) * scaleX;
+        const touchY = (e.touches[i].clientY - rect.top) * scaleY;
 
-        // Map screen areas to keys
-        if (touchX < canvas.width * 0.4) {
-            state.keys['ArrowLeft'] = true;
-        } else if (touchX > canvas.width * 0.6) {
-            state.keys['ArrowRight'] = true;
+        // Dragging: Use the first finger to move the car
+        if (i === 0) {
+            state.playerX = Math.max(40, Math.min(canvas.width - 40, touchX));
         }
         
-        // If touching the upper 80% of the screen, fire!
+        // Firing: If any finger is touching the upper 80% of the screen
         if (touchY < canvas.height * 0.8) {
             state.keys['Space'] = true;
         }
