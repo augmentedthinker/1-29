@@ -71,7 +71,7 @@ function handleTouch(e) {
     playBassLoop();
 
     const rect = canvas.getBoundingClientRect();
-    // Calculate scale because the canvas is resized by CSS on mobile
+    // This translates screen pixels (e.g. 300px) to game pixels (800px)
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
@@ -79,16 +79,16 @@ function handleTouch(e) {
     state.keys['Space'] = false;
 
     for (let i = 0; i < e.touches.length; i++) {
-        // Map touch to internal 800x600 coordinates
+        // Calculate exactly where the finger is inside the game coordinates
         const touchX = (e.touches[i].clientX - rect.left) * scaleX;
         const touchY = (e.touches[i].clientY - rect.top) * scaleY;
 
-        // Dragging: Use the first finger to move the car
+        // Dragging: The car follows the first finger horizontally
         if (i === 0) {
             state.playerX = Math.max(40, Math.min(canvas.width - 40, touchX));
         }
         
-        // Firing: If any finger is touching the upper 80% of the screen
+        // Firing: If any finger is touching the top 80% of the screen, shoot!
         if (touchY < canvas.height * 0.8) {
             state.keys['Space'] = true;
         }
