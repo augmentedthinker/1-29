@@ -50,6 +50,51 @@ window.addEventListener('keydown', e => {
 });
 window.addEventListener('keyup', e => state.keys[e.code] = false);
 
+// Mobile Touch Handling
+canvas.addEventListener('touchstart', handleTouch, { passive: false });
+canvas.addEventListener('touchmove', handleTouch, { passive: false });
+canvas.addEventListener('touchend', e => {
+    // Clear movement keys when fingers are lifted
+    state.keys['ArrowLeft'] = false;
+    state.keys['ArrowRight'] = false;
+    state.keys['Space'] = false;
+    e.preventDefault();
+}, { passive: false });
+
+function handleTouch(e) {
+    e.preventDefault(); // Prevents scrolling while playing
+    
+    // Resume audio on first touch
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    playBassLoop();
+
+    const rect = canvas.getBoundingClientRect();
+    
+    // Reset keys before checking current touches
+    state.keys['ArrowLeft'] = false;
+    state.keys['ArrowRight'] = false;
+    state.keys['Space'] = false;
+
+    for (let i = 0; i < e.touches.length; i++) {
+        const touchX = e.touches[i].clientX - rect.left;
+        const touchY = e.touches[i].clientY - rect.top;
+
+        // Map screen areas to keys
+        if (touchX < canvas.width * 0.4) {
+            state.keys['ArrowLeft'] = true;
+        } else if (touchX > canvas.width * 0.6) {
+            state.keys['ArrowRight'] = true;
+        }
+        
+        // If touching the upper 80% of the screen, fire!
+        if (touchY < canvas.height * 0.8) {
+            state.keys['Space'] = true;
+        }
+    }
+}
+
 /**
  * Synthesizes a retro laser "pew" sound
  */
